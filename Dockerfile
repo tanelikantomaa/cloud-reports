@@ -7,9 +7,9 @@
 # RUN npm run build
 FROM node:14-alpine
 ENV NODE_ENV=production
+WORKDIR /
 COPY . .
 RUN apk add --no-cache tini
-WORKDIR /src
 RUN chown node:node .
 USER node
 COPY package*.json ./
@@ -17,4 +17,4 @@ COPY package*.json ./
 RUN npm run build
 # COPY --from=builder /usr/src/app/lib/ lib/
 EXPOSE 3000
-ENTRYPOINT [ "/src","--", "node", "node_modules/.bin/tsserver" ]
+ENTRYPOINT [ "./","--", "node", "/src/node_modules/.bin/tsserver" ]
