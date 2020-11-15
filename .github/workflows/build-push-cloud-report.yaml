@@ -1,0 +1,40 @@
+name: master build and deploy to ECR
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build_push_cloud_reports:
+    runs-on: ubuntu-latest
+    name: Build cloud-reports Docker image push to ECR
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+        with:
+          fetch-depth: '0'
+      - name: Bump version and push tag
+        id: tagging
+        if: contains(github.ref, 'master')
+        uses: anothrNick/github-tag-action@1.21.0
+        env:
+          DEFAULT_BUMP: patch
+          INITIAL_VERSION: 1.5.0
+          RELEASE_BRANCHES: master
+      - name: Build Docker image and Push to ECR
+        uses: kciter/aws-ecr-action@v1
+        env:
+          repo: cloud-reports
+          IMG: cloud-reports
+        with:
+          access_key_id: ${{ secrets.CIUSER_AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.CIUSER_AWS_SECRET_ACCESS_KEY }}
+          account_id: 838837044885
+          dockerfile: ./Dockerfile
+          path: ./
+          # extra_build_args:
+          repo: ${{ env.repo }}
+          region: eu-central-1
+          tags: 1.6.0
+          create_repo: false
